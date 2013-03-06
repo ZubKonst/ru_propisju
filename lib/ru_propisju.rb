@@ -293,19 +293,19 @@ module RuPropisju
       parts << propisju_int(amount.to_i, money_gender, integrals, locale) unless amount.to_i == 0
     end
 
-    if amount.kind_of?(Float)
-      remainder = (amount.divmod(1)[1]*100).round
-      if remainder == 100
-        parts = [propisju_int(amount.to_i + 1, money_gender, integrals, locale)]
+    remainder = (amount.divmod(1)[1]*100).round
+    if remainder == 100
+      if integrals_as_number
+        parts = [amount.to_i, choose_plural(amount, integrals)]
       else
-        if fraction_as_number
-          kop = remainder.to_i
-          unless kop.zero?
-            parts << kop << choose_plural(kop, fractions)
-          end
-        else
-          parts << propisju_int(remainder.to_i, money_gender, fractions, locale)
-        end
+        parts = propisju_int(amount.to_i + 1, money_gender, integrals, locale)
+      end
+    else
+      if fraction_as_number
+        kop = remainder.to_i
+        parts << sprintf('%02d', kop) << choose_plural(kop, fractions)
+      else
+        parts << propisju_int(remainder.to_i, money_gender, fractions, locale)
       end
     end
 
@@ -316,7 +316,7 @@ module RuPropisju
 
   def zero(locale_data, integrals, fractions, fraction_as_number, integrals_as_number)
     integ = integrals_as_number ? '0' : locale_data['0']
-    frac = fraction_as_number ? '0' : locale_data['0']
+    frac = fraction_as_number ? '00' : locale_data['0']
     parts = [integ , integrals[-1], frac, fractions[-1]]
     parts.join(' ')
   end
